@@ -1,6 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://hn8dh5y3yq6a"]
+[gd_scene format=3 uid="uid://hn8dh5y3yq6a"]
 
 [ext_resource type="Script" uid="uid://gscsivoywwwo" path="res://main.gd" id="1_ig7tw"]
+[ext_resource type="Texture2D" uid="uid://bioamopp6syek" path="res://icon.svg" id="2_0xm2m"]
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=243540827]
 script = ExtResource("1_ig7tw")
+
+[node name="Point" type="Point" parent="." unique_id=260028693]
+sprite_path = NodePath("../Sprite2D")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1844590167]
+texture = ExtResource("2_0xm2m")
