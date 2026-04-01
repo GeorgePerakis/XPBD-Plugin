@@ -1,0 +1,29 @@
+n = substep count
+vi = particle velocity
+xi = particle position
+pi = particle previous position
+C = contraint equation
+∇C = contraint gradient
+lo = rest length
+λ = contraint movement scale
+
+Δts <- Δt/n
+for n substeps
+
+	for all particles i
+		vi += Δts*g
+		pi = xi 
+		xi += Δts*vi
+		
+	for all constraints C
+		for all particles i
+			C = |xi+1 - xi| - lo (Constraint correction)
+			∇Ci = (xi+1 - xi) / |xi+1 - xi|
+			∇Ci+1 = -∇Ci
+			λ = -C/(wi*(∇Ci)^2 + wi+1*(∇Ci+1)^2)
+			Δxi = λ*wi*∇Ci
+			xi += Δxi
+			
+	for all particles i
+		vi = (xi - pi) / Δts
+        xi += Δts*vi
