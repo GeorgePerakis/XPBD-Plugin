@@ -1,7 +1,21 @@
 {
   "explorer.autoReveal": false,
   "clangd.arguments": [
+    "--background-index",
+    "--clang-tidy",
+    "--header-insertion=never",
     "--query-driver=C:/Program Files/Microsoft Visual Studio/*/*/VC/Tools/MSVC/*/bin/*/cl.exe,C:/Program Files (x86)/Microsoft Visual Studio/*/*/VC/Tools/MSVC/*/bin/*/cl.exe"
+  ],
+  "clangd.fallbackFlags": [
+    "-std=c++17",
+    "-fms-compatibility",
+    "-fms-extensions",
+    "-isystem", "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/include",
+    "-isystem", "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/ucrt",
+    "-isystem", "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/shared",
+    "-isystem", "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um",
+    "-isystem", "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/winrt",
+    "-isystem", "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/cppwinrt"
   ],
   "files.exclude": {
     ".zed":true,
