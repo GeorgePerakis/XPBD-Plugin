@@ -1,18 +1,18 @@
-[gd_scene load_steps=3 format=3 uid="uid://hn8dh5y3yq6a"]
+[gd_scene format=3 uid="uid://hn8dh5y3yq6a"]
 
 [ext_resource type="Script" uid="uid://gscsivoywwwo" path="res://main.gd" id="1_ig7tw"]
 [ext_resource type="Texture2D" uid="uid://bioamopp6syek" path="res://icon.svg" id="2_0xm2m"]
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=869455154]
 script = ExtResource("1_ig7tw")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1143114033]
+position = Vector2(-727, 318)
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=344355666]
 position = Vector2(375, 84)
 texture = ExtResource("2_0xm2m")
 
-[node name="SoftBody2D" type="SoftBody2D" parent="."]
+[node name="SoftBody2D" type="SoftBody2D" parent="." unique_id=692880084]
 sprite_path = NodePath("../Sprite2D")
-position = Vector2(557, 367)
-
-[node name="Camera2D" type="Camera2D" parent="."]
-zoom = Vector2(0.26, 0.26)
+position = Vector2(-1108, -758)

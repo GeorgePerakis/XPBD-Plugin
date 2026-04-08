@@ -24,8 +24,9 @@ private:
     std::vector<Particle> Particles;
     std::vector<godot::Sprite2D*> particle_sprites;
     std::vector<Distance_Constraint> Distance_Constraints;
+    double floor_y = 1080.0;
 
-    std::vector<Particle> spawn_rectangle(double particle_distance);
+    void spawn_rectangle(double particle_distance);
 
     void step(double delta);
 

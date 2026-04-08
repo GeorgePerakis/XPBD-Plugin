@@ -4,9 +4,9 @@
 
 struct Particle {
     Vec2 position;
-    Vec2 old_position;
-    float inverse_mass;
+    Vec2 prev_position;
+    double inverse_mass;
 
-    Particle() : position(), old_position(), inverse_mass(0.0f) {}
-    Particle(Vec2 pos, float inv_mass) : position(pos), old_position(pos), inverse_mass(inv_mass) {}
+    Particle() : position(), prev_position(), inverse_mass(0.0f) {}
+    Particle(Vec2 pos, float inv_mass) : position(pos), prev_position(pos), inverse_mass(inv_mass) {}
 };
