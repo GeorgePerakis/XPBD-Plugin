@@ -18,7 +18,6 @@ protected:
 	static void _bind_methods();
 
 private:
-    godot::NodePath sprite_path;
     godot::Ref<godot::Texture2D> particle_texture;
     
     std::vector<Particle> Particles;
@@ -26,13 +25,13 @@ private:
     std::vector<Distance_Constraint> Distance_Constraints;
     double floor_y = 1080.0;
 
-    void spawn_rectangle(double particle_distance);
+    void spawn_rectangle(double particle_distance, double mass, double stiffness);
 
     void step(double delta);
 
     void create_particle_sprites();
 
-    void set_sprite_path(const godot::NodePath new_path) { sprite_path = new_path; }
+    void set_particle_texture(const godot::Ref<godot::Texture2D> &tex) { particle_texture = tex; }
 
-	godot::NodePath get_sprite_path() const { return sprite_path; }
+	godot::Ref<godot::Texture2D> get_particle_texture() const { return particle_texture; }
 };
