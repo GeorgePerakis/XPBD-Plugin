@@ -103,6 +103,7 @@ void SoftBody2D::_ready() {
 
 void SoftBody2D::_physics_process(double delta) {
 	if (Engine::get_singleton()->is_editor_hint()) {
+        queue_redraw();
 		return;
 	}
 	step(delta);

@@ -7,9 +7,38 @@ import time
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(SCRIPT_DIR)
 XPBD_Plugin_DIR = os.path.join(PARENT_DIR, "XPBD_Plugin")
+DONT_TOUCH_PATH = os.path.join(PARENT_DIR, "dont_touch.txt")
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
+
+
+def read_saved_godot_path():
+    """Read the saved Godot executable path from dont_touch.txt line 3."""
+    try:
+        with open(DONT_TOUCH_PATH, "r") as f:
+            lines = f.readlines()
+        if len(lines) >= 3:
+            path = lines[2].strip()
+            if path and path != "GODOT_ENGINE_PATH_GOES_HERE" and os.path.isfile(path):
+                return path
+    except Exception:
+        pass
+    return None
+
+
+def save_godot_path(godot_path):
+    """Save the Godot executable path to dont_touch.txt line 3."""
+    try:
+        with open(DONT_TOUCH_PATH, "r") as f:
+            lines = f.readlines()
+        while len(lines) < 3:
+            lines.append("\n")
+        lines[2] = godot_path + "\n"
+        with open(DONT_TOUCH_PATH, "w") as f:
+            f.writelines(lines)
+    except Exception:
+        pass
 
 
 def get_godot_executable_path():
@@ -48,7 +77,9 @@ def run_scons_build():
     try:
         # Check if Godot is running before compilation (it locks the DLL on Windows)
         godot_path = get_godot_executable_path()
+        was_running = godot_path is not None
         if godot_path:
+            save_godot_path(godot_path)
             print("Godot editor detected. Closing it to unlock the DLL for compilation...")
             subprocess.run(
                 ['powershell', '-NoProfile', '-Command',
@@ -56,6 +87,8 @@ def run_scons_build():
                 capture_output=True, text=True
             )
             time.sleep(1)
+        else:
+            godot_path = read_saved_godot_path()
 
         process = subprocess.Popen(
             ["scons", "compiledb=yes"],
@@ -89,6 +122,8 @@ def run_scons_build():
             print("The compile_commands.json file was also updated to improve IntelliSense support.")
             if godot_path:
                 reload_godot_project(godot_path)
+            else:
+                print("\nNo saved Godot editor path found. Open the project manually or run Godot once so the path can be saved.")
         else:
             print("\nCompilation FAILED:")
             print(''.join(stderr_lines).strip() or "Unknown error occurred.")
