@@ -7,10 +7,10 @@
 script = ExtResource("1_ig7tw")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1143114033]
-position = Vector2(-727, 318)
+position = Vector2(-1040, 1)
 offset = Vector2(0, -0.095)
-zoom = Vector2(0.23, 0.23)
+zoom = Vector2(0.375, 0.375)
 
 [node name="SoftBody2D" type="SoftBody2D" parent="." unique_id=692880084]
 particle_texture = ExtResource("2_0xm2m")
-position = Vector2(-997, -2477)
+position = Vector2(-1023, -586)

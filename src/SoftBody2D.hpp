@@ -13,6 +13,7 @@ class SoftBody2D: public godot::Node2D {
 public:
 	void _physics_process(double delta) override;
     void _ready() override;
+    void _draw() override;
 
 protected:
 	static void _bind_methods();

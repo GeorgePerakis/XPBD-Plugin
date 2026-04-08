@@ -1,18 +1,62 @@
 import subprocess
 import sys
 import os
+import time
 
 # Paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(SCRIPT_DIR)
+TEST_PROJECT_DIR = os.path.join(PARENT_DIR, "test_project")
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
+def get_godot_executable_path():
+    """Find the executable path of a running Godot editor process (Windows only)."""
+    if os.name != 'nt':
+        return None
+    try:
+        result = subprocess.run(
+            ['powershell', '-NoProfile', '-Command',
+             "(Get-Process -Name 'Godot*' -ErrorAction SilentlyContinue | Select-Object -First 1).Path"],
+            capture_output=True, text=True
+        )
+        path = result.stdout.strip()
+        if path:
+            return path
+    except Exception:
+        pass
+    return None
+
+
+def reload_godot_project(godot_path):
+    """Reopen the test project in the Godot editor."""
+    try:
+        print("\nReopening Godot editor...")
+        subprocess.Popen(
+            [godot_path, '--editor', '--path', TEST_PROJECT_DIR],
+            creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+        )
+        print("Godot project reloaded.")
+    except Exception as e:
+        print(f"Failed to reload Godot project: {e}")
+
+
 def run_scons_build():
     """Run 'scons compiledb=yes' from the project root and show output in real-time."""
     try:
+        # Check if Godot is running before compilation (it locks the DLL on Windows)
+        godot_path = get_godot_executable_path()
+        if godot_path:
+            print("Godot editor detected. Closing it to unlock the DLL for compilation...")
+            subprocess.run(
+                ['powershell', '-NoProfile', '-Command',
+                 "Get-Process -Name 'Godot*' -ErrorAction SilentlyContinue | Stop-Process -Force"],
+                capture_output=True, text=True
+            )
+            time.sleep(1)
+
         process = subprocess.Popen(
             ["scons", "compiledb=yes"],
             stdout=subprocess.PIPE,
@@ -43,6 +87,8 @@ def run_scons_build():
             print("\nCompilation finished successfully.")
             print("A debug build for your current OS and architecture was added to the bin folder.")
             print("The compile_commands.json file was also updated to improve IntelliSense support.")
+            if godot_path:
+                reload_godot_project(godot_path)
         else:
             print("\nCompilation FAILED:")
             print(''.join(stderr_lines).strip() or "Unknown error occurred.")

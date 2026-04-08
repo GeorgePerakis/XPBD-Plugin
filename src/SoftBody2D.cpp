@@ -75,6 +75,8 @@ void SoftBody2D::step(double delta) {
 
 		particle_sprites[i]->set_global_position(Vector2(p.position.x, p.position.y));
 	}
+
+    queue_redraw();
 }
 
 void SoftBody2D::create_particle_sprites() {
@@ -103,6 +105,15 @@ void SoftBody2D::_physics_process(double delta) {
 	if (Engine::get_singleton()->is_editor_hint()) {
 		return;
 	}
-
 	step(delta);
+}
+
+void SoftBody2D::_draw() {
+    for (Distance_Constraint &c : Distance_Constraints) {
+        Vec2 pos_a = Particles[c.particle_a].position;
+        Vec2 pos_b = Particles[c.particle_b].position;
+        Vector2 local_a = to_local(Vector2(pos_a.x, pos_a.y));
+        Vector2 local_b = to_local(Vector2(pos_b.x, pos_b.y));
+        draw_line(local_a, local_b, Color(1, 0, 0), 3.0);
+    }
 }
