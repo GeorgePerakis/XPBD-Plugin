@@ -6,7 +6,7 @@ import time
 # Paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(SCRIPT_DIR)
-TEST_PROJECT_DIR = os.path.join(PARENT_DIR, "test_project")
+XPBD_Plugin_DIR = os.path.join(PARENT_DIR, "XPBD_Plugin")
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -35,7 +35,7 @@ def reload_godot_project(godot_path):
     try:
         print("\nReopening Godot editor...")
         subprocess.Popen(
-            [godot_path, '--editor', '--path', TEST_PROJECT_DIR],
+            [godot_path, '--editor', '--path', XPBD_Plugin_DIR],
             creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
         )
         print("Godot project reloaded.")
