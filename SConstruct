@@ -261,6 +261,10 @@ else:
 install_dir = f"{projectdir}/{libname}/bin/{env['platform']}/"
 copy = env.Install(install_dir, source=install_source)
 
+# Install the library to XPBD_Plugin
+plugin_install_dir = f"XPBD_Plugin/{libname}/bin/{env['platform']}/"
+plugin_copy = env.Install(plugin_install_dir, source=install_source)
+
 # Set default targets
-default_args = [library, copy]
+default_args = [library, copy, plugin_copy]
 Default(*default_args)

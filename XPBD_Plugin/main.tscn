@@ -1,16 +1,20 @@
-[gd_scene format=3 uid="uid://hn8dh5y3yq6a"]
+[gd_scene load_steps=3 format=3 uid="uid://hn8dh5y3yq6a"]
 
 [ext_resource type="Script" uid="uid://gscsivoywwwo" path="res://main.gd" id="1_ig7tw"]
 [ext_resource type="Texture2D" uid="uid://c2o5xyoy215my" path="res://red-basic-shape-for-new-product-stickers-special-offer-label-png.png" id="2_0xm2m"]
 
-[node name="Main" type="Node2D" unique_id=869455154]
+[node name="Main" type="Node2D"]
 script = ExtResource("1_ig7tw")
 
-[node name="Camera2D" type="Camera2D" parent="." unique_id=1143114033]
+[node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(-1040, 1)
 offset = Vector2(0, -0.095)
-zoom = Vector2(0.375, 0.375)
+zoom = Vector2(0.175, 0.175)
 
-[node name="SoftBody2D" type="SoftBody2D" parent="." unique_id=692880084]
+[node name="SoftBody2D" type="SoftBody2D" parent="."]
 particle_texture = ExtResource("2_0xm2m")
-position = Vector2(-1023, -586)
+grid_width = 16
+grid_height = 16
+grid_spacing = 150.0
+grid_stiffness = 10000.0
+position = Vector2(-1023, -1887)
