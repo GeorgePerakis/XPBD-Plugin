@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dfbhdrh17lat5"
+
+[deps]
+
+files=["res://metrics/metrics_20260707_162237/metrics.step.translation", "res://metrics/metrics_20260707_162237/metrics.avg.translation", "res://metrics/metrics_20260707_162237/metrics.max.translation", "res://metrics/metrics_20260707_162237/metrics.error.translation", "res://metrics/metrics_20260707_162237/metrics.particles.translation", "res://metrics/metrics_20260707_162237/metrics.constraints.translation"]
+
+source_file="res://metrics/metrics_20260707_162237/metrics.csv"
+dest_files=["res://metrics/metrics_20260707_162237/metrics.step.translation", "res://metrics/metrics_20260707_162237/metrics.avg.translation", "res://metrics/metrics_20260707_162237/metrics.max.translation", "res://metrics/metrics_20260707_162237/metrics.error.translation", "res://metrics/metrics_20260707_162237/metrics.particles.translation", "res://metrics/metrics_20260707_162237/metrics.constraints.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

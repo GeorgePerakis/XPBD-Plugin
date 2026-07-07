@@ -5,6 +5,12 @@
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "structs/Particle.hpp"
 
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <filesystem>
+#include <ctime>
+
 using namespace godot;
 
 void SoftBody2D::_bind_methods() {
@@ -43,6 +49,99 @@ void SoftBody2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_metric_constraint_count"), &SoftBody2D::get_metric_constraint_count);
 	ClassDB::bind_method(D_METHOD("get_metric_avg_step_time_ms"), &SoftBody2D::get_metric_avg_step_time_ms);
 	ClassDB::bind_method(D_METHOD("get_metric_max_step_time_ms"), &SoftBody2D::get_metric_max_step_time_ms);
+	ClassDB::bind_method(D_METHOD("start_metrics_capture", "duration_s", "sample_ms"), &SoftBody2D::start_metrics_capture);
+
+	ClassDB::bind_method(D_METHOD("set_auto_start_capture", "value"), &SoftBody2D::set_auto_start_capture);
+	ClassDB::bind_method(D_METHOD("get_auto_start_capture"), &SoftBody2D::get_auto_start_capture);
+	ADD_PROPERTY(make_property_info(Variant::BOOL, "auto_start_capture"), "set_auto_start_capture", "get_auto_start_capture");
+
+	ClassDB::bind_method(D_METHOD("set_capture_duration", "value"), &SoftBody2D::set_capture_duration);
+	ClassDB::bind_method(D_METHOD("get_capture_duration"), &SoftBody2D::get_capture_duration);
+	ADD_PROPERTY(make_property_info(Variant::FLOAT, "capture_duration"), "set_capture_duration", "get_capture_duration");
+
+	ClassDB::bind_method(D_METHOD("set_sampling_interval", "value"), &SoftBody2D::set_sampling_interval);
+	ClassDB::bind_method(D_METHOD("get_sampling_interval"), &SoftBody2D::get_sampling_interval);
+	ADD_PROPERTY(make_property_info(Variant::FLOAT, "sampling_interval"), "set_sampling_interval", "get_sampling_interval");
+}
+
+void SoftBody2D::start_metrics_capture(double duration_s, double sample_ms) {
+    capture_active = true;
+    capture_duration_s = duration_s > 0.0 ? duration_s : 10.0;
+    sampling_interval_ms = sample_ms > 0.0 ? sample_ms : 100.0;
+    capture_elapsed_ms = 0.0;
+    sample_accumulator_ms = 0.0;
+    metric_samples.clear();
+    UtilityFunctions::print("[XPBD Metrics] Starting capture for ", capture_duration_s, "s, sampling ", sampling_interval_ms, "ms");
+}
+
+void SoftBody2D::process_metrics_capture(double delta_ms) {
+    if (!capture_active) return;
+
+    capture_elapsed_ms += delta_ms;
+    sample_accumulator_ms += delta_ms;
+
+    if (sample_accumulator_ms >= sampling_interval_ms) {
+        MetricSample s;
+        s.time_s = capture_elapsed_ms / 1000.0;
+        s.step_ms = metric_step_time_ms;
+        s.avg_ms = metric_avg_step_time_ms;
+        s.max_ms = metric_max_step_time_ms;
+        s.error = metric_constraint_error;
+        s.particles = metric_particle_count;
+        s.constraints = metric_constraint_count;
+        metric_samples.push_back(s);
+        sample_accumulator_ms -= sampling_interval_ms;
+    }
+
+    if (capture_elapsed_ms >= capture_duration_s * 1000.0) {
+        capture_active = false;
+        write_metrics_csv();
+    }
+}
+
+void SoftBody2D::write_metrics_csv() {
+    auto now = std::chrono::system_clock::now();
+    std::time_t tnow = std::chrono::system_clock::to_time_t(now);
+    std::tm tm = *std::localtime(&tnow);
+    std::ostringstream dirname;
+    dirname << "metrics/metrics_" << std::put_time(&tm, "%Y%m%d_%H%M%S");
+
+    std::error_code ec;
+    std::filesystem::create_directories(dirname.str(), ec);
+    if (ec) {
+        UtilityFunctions::print("[XPBD Metrics] Failed to create metrics directory");
+    }
+
+    std::ostringstream fname;
+    fname << dirname.str() << "/metrics.csv";
+
+    std::ofstream out(fname.str());
+    if (!out.is_open()) {
+        UtilityFunctions::print("[XPBD Metrics] Failed to open CSV file: ", fname.str().c_str());
+        return;
+    }
+
+    out << "time_s,step_time_ms,avg_ms,max_ms,error,particles,constraints\n";
+    out << std::fixed << std::setprecision(6);
+    for (auto &s : metric_samples) {
+        out << s.time_s << "," << s.step_ms << "," << s.avg_ms << "," << s.max_ms << "," << s.error << "," << s.particles << "," << s.constraints << "\n";
+    }
+    out.close();
+
+    UtilityFunctions::print("[XPBD Metrics] Capture complete. CSV written to: ", fname.str().c_str());
+
+    // Try to launch the Python plotting script
+    // Note: paths are relative to Godot's working directory (the project folder)
+    std::ostringstream cmd;
+#ifdef _WIN32
+    cmd << "py ../tools/plot_metrics.py " << fname.str();
+#else
+    cmd << "python3 ../tools/plot_metrics.py " << fname.str();
+#endif
+    int rc = std::system(cmd.str().c_str());
+    if (rc != 0) {
+        UtilityFunctions::print("[XPBD Metrics] Failed to launch Python plot (rc=", rc, "). Run: python tools/plot_metrics.py ", fname.str().c_str());
+    }
 }
 
 void SoftBody2D::spawn_rectangle(double particle_distance, double mass, double stiffness) {
@@ -231,6 +330,10 @@ void SoftBody2D::_ready() {
         metric_particle_count, " particles, ",
         metric_constraint_count, " constraints, ",
         num_substeps, " substeps");
+
+    if (auto_start_capture) {
+        start_metrics_capture(capture_duration_s, sampling_interval_ms);
+    }
 }
 
 void SoftBody2D::_physics_process(double delta) {
@@ -240,16 +343,8 @@ void SoftBody2D::_physics_process(double delta) {
 	}
 	step(delta);
 
-    // Log metrics every 60 frames
-    if (metric_frame_count % 60 == 0) {
-        UtilityFunctions::print("[XPBD Metrics] frame=", metric_frame_count,
-            " | step_time=", metric_step_time_ms, "ms",
-            " | avg=", metric_avg_step_time_ms, "ms",
-            " | max=", metric_max_step_time_ms, "ms",
-            " | error=", metric_constraint_error,
-            " | particles=", metric_particle_count,
-            " | constraints=", metric_constraint_count);
-    }
+    // Process metrics capture (if active)
+    process_metrics_capture(delta * 1000.0);
 }
 
 void SoftBody2D::_draw() {

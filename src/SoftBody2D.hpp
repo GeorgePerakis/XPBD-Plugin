@@ -7,6 +7,7 @@
 #include "structs/Particle.hpp"
 #include <vector>
 #include <chrono>
+#include <string>
 
 class SoftBody2D: public godot::Node2D {
     GDCLASS(SoftBody2D, godot::Node2D)
@@ -45,6 +46,29 @@ private:
     double metric_max_step_time_ms = 0.0;
     double metric_total_step_time_ms = 0.0;
 
+    struct MetricSample {
+        double time_s = 0.0;
+        double step_ms = 0.0;
+        double avg_ms = 0.0;
+        double max_ms = 0.0;
+        double error = 0.0;
+        int particles = 0;
+        int constraints = 0;
+    };
+
+    // Capture state
+    bool auto_start_capture = true;
+    bool capture_active = false;
+    double capture_duration_s = 10.0;
+    double sampling_interval_ms = 100.0;
+    double capture_elapsed_ms = 0.0;
+    double sample_accumulator_ms = 0.0;
+    std::vector<MetricSample> metric_samples;
+
+    void start_metrics_capture(double duration_s = 10.0, double sample_ms = 100.0);
+    void process_metrics_capture(double delta_ms);
+    void write_metrics_csv();
+
     void spawn_rectangle(double particle_distance, double mass, double stiffness);
     void spawn_grid(int width, int height, double spacing, double mass, double stiffness);
 
@@ -80,4 +104,13 @@ private:
     int get_metric_constraint_count() const { return metric_constraint_count; }
     double get_metric_avg_step_time_ms() const { return metric_avg_step_time_ms; }
     double get_metric_max_step_time_ms() const { return metric_max_step_time_ms; }
+
+    void set_auto_start_capture(bool v) { auto_start_capture = v; }
+    bool get_auto_start_capture() const { return auto_start_capture; }
+
+    void set_capture_duration(double v) { capture_duration_s = v > 0.0 ? v : 10.0; }
+    double get_capture_duration() const { return capture_duration_s; }
+
+    void set_sampling_interval(double v) { sampling_interval_ms = v > 0.0 ? v : 100.0; }
+    double get_sampling_interval() const { return sampling_interval_ms; }
 };
