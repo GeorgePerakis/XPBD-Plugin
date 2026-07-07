@@ -6,8 +6,11 @@
 #include "structs/Distance_Constraint.hpp"
 #include "structs/Particle.hpp"
 #include <vector>
-#include <chrono>
-#include <string>
+
+enum SolverMode {
+    SOLVER_FLAT_XPBD = 0,
+    SOLVER_HIERARCHICAL = 1,
+};
 
 class SoftBody2D: public godot::Node2D {
     GDCLASS(SoftBody2D, godot::Node2D)
@@ -28,6 +31,13 @@ private:
     std::vector<Distance_Constraint> Distance_Constraints;
     double floor_y = 1080.0;
     int num_substeps = 10;
+
+    // Solver mode
+    int solver_mode = SOLVER_FLAT_XPBD;
+
+    // Hierarchical priority groups (indices into Distance_Constraints)
+    std::vector<std::vector<int>> priority_groups;
+    void build_priority_groups();
 
     // Stress test parameters
     int grid_width = 2;
@@ -73,6 +83,8 @@ private:
     void spawn_grid(int width, int height, double spacing, double mass, double stiffness);
 
     void step(double delta);
+    void solve_flat(double sub_dt);
+    void solve_hierarchical(double sub_dt);
     double compute_constraint_error();
 
     void create_particle_sprites();
@@ -113,4 +125,7 @@ private:
 
     void set_sampling_interval(double v) { sampling_interval_ms = v > 0.0 ? v : 100.0; }
     double get_sampling_interval() const { return sampling_interval_ms; }
+
+    void set_solver_mode(int v) { solver_mode = (v == SOLVER_HIERARCHICAL) ? SOLVER_HIERARCHICAL : SOLVER_FLAT_XPBD; }
+    int get_solver_mode() const { return solver_mode; }
 };
