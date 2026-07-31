@@ -31,6 +31,7 @@ private:
     std::vector<Distance_Constraint> Distance_Constraints;
     double floor_y = 1080.0;
     int num_substeps = 10;
+    int solver_iterations = 1;
 
     // Solver mode
     int solver_mode = SOLVER_FLAT_XPBD;
@@ -79,7 +80,6 @@ private:
     void process_metrics_capture(double delta_ms);
     void write_metrics_csv();
 
-    void spawn_rectangle(double particle_distance, double mass, double stiffness);
     void spawn_grid(int width, int height, double spacing, double mass, double stiffness);
 
     void step(double delta);
@@ -94,6 +94,9 @@ private:
 
     void set_num_substeps(int value) { num_substeps = value > 0 ? value : 1; }
     int get_num_substeps() const { return num_substeps; }
+
+    void set_solver_iterations(int value) { solver_iterations = value > 0 ? value : 1; }
+    int get_solver_iterations() const { return solver_iterations; }
 
     void set_grid_width(int value) { grid_width = value > 1 ? value : 2; }
     int get_grid_width() const { return grid_width; }

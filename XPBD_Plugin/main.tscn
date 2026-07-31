@@ -8,16 +8,17 @@ script = ExtResource("1_ig7tw")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=681272353]
 position = Vector2(-632, -1223)
-offset = Vector2(0, -0.095)
-zoom = Vector2(0.175, 0.175)
+offset = Vector2(0, 0.355)
+zoom = Vector2(-0.015, -0.015)
 
 [node name="SoftBody2D" type="SoftBody2D" parent="." unique_id=1902008715]
 particle_texture = ExtResource("2_0xm2m")
-grid_width = 16
-grid_height = 16
+solver_iterations = 4
+grid_width = 100
+grid_height = 100
 grid_spacing = 150.0
 grid_mass = 2.0
 grid_stiffness = 10000.0
 capture_duration = 15.0
 solver_mode = 1
-position = Vector2(-1023, -1887)
+position = Vector2(-4619, -10062)

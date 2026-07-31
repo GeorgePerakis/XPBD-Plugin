@@ -1,0 +1,16 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://83ja5o1mdga8"
+
+[deps]
+
+source_file="res://metrics/metrics_20260731_143134/metrics.csv"
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

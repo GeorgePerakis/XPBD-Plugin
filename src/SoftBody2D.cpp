@@ -15,6 +15,10 @@ void SoftBody2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_num_substeps"), &SoftBody2D::get_num_substeps);
 	ADD_PROPERTY(make_property_info(Variant::INT, "num_substeps"), "set_num_substeps", "get_num_substeps");
 
+	ClassDB::bind_method(D_METHOD("set_solver_iterations", "value"), &SoftBody2D::set_solver_iterations);
+	ClassDB::bind_method(D_METHOD("get_solver_iterations"), &SoftBody2D::get_solver_iterations);
+	ADD_PROPERTY(make_property_info(Variant::INT, "solver_iterations"), "set_solver_iterations", "get_solver_iterations");
+
 	ClassDB::bind_method(D_METHOD("set_grid_width", "value"), &SoftBody2D::set_grid_width);
 	ClassDB::bind_method(D_METHOD("get_grid_width"), &SoftBody2D::get_grid_width);
 	ADD_PROPERTY(make_property_info(Variant::INT, "grid_width"), "set_grid_width", "get_grid_width");

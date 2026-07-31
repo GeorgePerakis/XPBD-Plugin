@@ -8,31 +8,6 @@
 
 using namespace godot;
 
-void SoftBody2D::spawn_rectangle(double particle_distance, double mass, double stiffness) {
-    Vector2 origin = get_global_position();
-    double ox = origin.x;
-    double oy = origin.y;
-
-    Particles = {
-        Particle(Vec2(ox, oy), 1/mass),
-        Particle(Vec2(ox + particle_distance, oy), 1/mass),
-        Particle(Vec2(ox + particle_distance, oy + particle_distance), 1/mass),
-        Particle(Vec2(ox, oy + particle_distance), 1/mass),
-    };
-
-    Distance_Constraints = {
-        Distance_Constraint(0, 1, particle_distance, stiffness),
-        Distance_Constraint(1, 2, particle_distance, stiffness),
-        Distance_Constraint(2, 3, particle_distance, stiffness),
-        Distance_Constraint(3, 0, particle_distance, stiffness),
-        Distance_Constraint(0, 2, std::sqrt(2.0) * particle_distance, stiffness),
-        Distance_Constraint(1, 3, std::sqrt(2.0) * particle_distance, stiffness),
-    };
-
-    metric_particle_count = (int)Particles.size();
-    metric_constraint_count = (int)Distance_Constraints.size();
-}
-
 void SoftBody2D::spawn_grid(int width, int height, double spacing, double mass, double stiffness) {
     Vector2 origin = get_global_position();
     double ox = origin.x;
@@ -166,14 +141,11 @@ void SoftBody2D::step(double delta) {
 	double sub_dt = delta / num_substeps;
 
 	for (int substep = 0; substep < num_substeps; substep++) {
-		// Predict positions
+		// Predict positions using explicit velocity
 		for (int i = 0; i < Particles.size(); i++) {
 			Particle &p = Particles[i];
-
-			Vec2 velocity = p.position - p.prev_position;
 			p.prev_position = p.position;
-			p.position = p.position + velocity;
-			p.position.y += GRAVITY * sub_dt * sub_dt;
+			p.position = p.position + p.velocity * sub_dt + Vec2(0.0, GRAVITY * sub_dt * sub_dt);
 		}
 
 		// Reset Lagrange multipliers
@@ -181,11 +153,19 @@ void SoftBody2D::step(double delta) {
 			Distance_Constraints[i].lambda = 0.0;
 		}
 
-		// Solve constraints based on solver mode
-		if (solver_mode == SOLVER_HIERARCHICAL) {
-			solve_hierarchical(sub_dt);
-		} else {
-			solve_flat(sub_dt);
+		// Solver iterations loop
+		for (int iter = 0; iter < solver_iterations; iter++) {
+			if (solver_mode == SOLVER_HIERARCHICAL) {
+				solve_hierarchical(sub_dt);
+			} else {
+				solve_flat(sub_dt);
+			}
+		}
+
+		// Update velocities explicitly
+		for (int i = 0; i < Particles.size(); i++) {
+			Particle &p = Particles[i];
+			p.velocity = (p.position - p.prev_position) / sub_dt;
 		}
 
 		// Floor collision
@@ -193,6 +173,7 @@ void SoftBody2D::step(double delta) {
 			Particle &p = Particles[i];
 			if (p.position.y > floor_y) {
 				p.position.y = floor_y;
+				p.velocity.y = 0.0;
 			}
 		}
 	}
